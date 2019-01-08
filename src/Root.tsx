@@ -1,4 +1,4 @@
-import React, { Component, SyntheticEvent } from "react"
+import React, { ChangeEvent, Component } from "react"
 import "./App.css"
 import { parse, stringify } from "query-string"
 import { RouteComponentProps, Router } from "@reach/router"
@@ -19,28 +19,22 @@ export interface HomePageProps extends RouteComponentProps
 
 export function HomePage( { location, navigate }: HomePageProps )
 {
+	const buildQuery = ( overrides = {} ) => "/?" + stringify( {
+		sort:   "pertinence",
+		filter: "todo",
+		...parse( location!.search ),
+		...overrides,
+	} ) as any
+	
 	const query  = parse( location!.search ),
 	      sort   = query.sort as string,
 	      filter = query.filter as string
 	
 	if ( !filter || !sort )
-		process.nextTick( () => navigate!( `/?sort=date&filter=todo` ) )
+		process.nextTick( () => navigate!( `${ buildQuery() }` ) )
 	
-	
-	const handleSelectValue = ( e: SyntheticEvent<HTMLSelectElement> ) => {
-		
-		const target = e.target as HTMLSelectElement
-		
-		const query = {
-			...parse( location!.search ),
-			[ target.name ]: target.value,
-		}
-		
-		
-		navigate!( `/?${stringify( query )}` )
-	}
-	
-	console.log( "display", location!.search, filter, sort )
+	const handleSelectValue = ( { target: { name, value } }: ChangeEvent<HTMLSelectElement> ) =>
+		navigate!( `${ buildQuery( { [ name ]: value } )}` )
 	
 	return (
 		<div>
@@ -80,13 +74,6 @@ export class Root extends Component<RootProps, RootState>
 {
 	
 	static defaultProps = {}
-	
-	
-	// static getDerivedStateFromProps( props: RootProps, state: RootState )
-	// {
-	//
-	// }
-	
 	
 	state = {}
 	
