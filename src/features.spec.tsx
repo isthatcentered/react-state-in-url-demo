@@ -10,19 +10,25 @@ let WRAPPER: ReactWrapper<LocationProviderProps>,
     PROPS: LocationProviderProps
 
 describe( `Maintaining state using query params`, () => {
+	let SORT: string,
+	    FILTER: string,
+	    SORT_DEFAULT: string   = "pertinence",
+	    FILTER_DEFAULT: string = "todo"
 	
 	describe( `Query params provided in URL`, () => {
-		
 		beforeEach( () => {
-			makeWrapper( { search: `?sort=date&filter=done` } )
+			SORT = "date"
+			FILTER = "done"
+			makeWrapper( { search: `?sort=${SORT}&filter=${FILTER}` } )
 		} )
 		
 		test( `Selects are set to value in url`, () => {
-			let sortSelect   = WRAPPER.find( `select[name="sort"]` ),
-			    filterSelect = WRAPPER.find( `select[name="filter"]` )
+			let sortSelect   = getByName( "sort" ),
+			    filterSelect = getByName( "filter" )
 			
-			expect( sortSelect.props().value ).toBe( "date" )
-			expect( filterSelect.props().value ).toBe( "done" )
+			expect( sortSelect.prop( "value" ) ).toBe( "date" )
+			
+			expect( filterSelect.prop( "value" ) ).toBe( "done" )
 		} )
 	} )
 	
@@ -35,20 +41,21 @@ describe( `Maintaining state using query params`, () => {
 			
 			await tick()
 			
-			expect( PROPS.history!.navigate ).toHaveBeenCalledWith( `/?filter=todo&sort=pertinence`, undefined ) // param 2 is opts
+			expect( PROPS.history!.navigate ).toHaveBeenCalledWith( `/?filter=${FILTER_DEFAULT}&sort=${SORT_DEFAULT}`, undefined ) // param 2 is opts
 		} )
 	} )
 	
 	describe( `Only some params in url query`, () => {
 		beforeEach( () => {
-			makeWrapper( { search: `?sort=date` } )
+			SORT = "date"
+			makeWrapper( { search: `?sort=${SORT}` } )
 		} )
 		
 		test( `Defautl parameters are added to url without overriding passed ones`, async () => {
 			
 			await tick()
 			
-			expect( PROPS.history!.navigate ).toHaveBeenCalledWith( `/?filter=todo&sort=date`, undefined ) // param 2 is opts
+			expect( PROPS.history!.navigate ).toHaveBeenCalledWith( `/?filter=${FILTER_DEFAULT}&sort=${SORT}`, undefined ) // param 2 is opts
 		} )
 	} )
 } )
@@ -57,6 +64,12 @@ describe( `Maintaining state using query params`, () => {
 function tick(): Promise<any>
 {
 	return new Promise( resolve => process.nextTick( () => resolve() ) )
+}
+
+
+function getByName( name: string ): ReactWrapper
+{
+	return WRAPPER.find( `[name="${name}"]` )
 }
 
 
