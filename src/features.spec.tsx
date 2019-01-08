@@ -9,6 +9,14 @@ import { Root } from "./Root"
 let WRAPPER: ReactWrapper<LocationProviderProps>,
     PROPS: LocationProviderProps
 
+
+function ensureNavigateCalledOnNextTickForHistoryPropUpdateToWork()
+{
+// navigate on mount needs to be called on next tick for history.location.search to be updated
+	expect( PROPS.history!.navigate ).not.toHaveBeenCalled()
+}
+
+
 describe( `Maintaining state using query params`, () => {
 	let SORT: string,
 	    FILTER: string,
@@ -39,6 +47,8 @@ describe( `Maintaining state using query params`, () => {
 		
 		test( `Url params are updated with default values`, async () => {
 			
+			ensureNavigateCalledOnNextTickForHistoryPropUpdateToWork()
+			
 			await tick()
 			
 			expect( PROPS.history!.navigate ).toHaveBeenCalledWith( `/?filter=${FILTER_DEFAULT}&sort=${SORT_DEFAULT}`, undefined ) // param 2 is opts
@@ -52,6 +62,8 @@ describe( `Maintaining state using query params`, () => {
 		} )
 		
 		test( `Defautl parameters are added to url without overriding passed ones`, async () => {
+			
+			ensureNavigateCalledOnNextTickForHistoryPropUpdateToWork()
 			
 			await tick()
 			
